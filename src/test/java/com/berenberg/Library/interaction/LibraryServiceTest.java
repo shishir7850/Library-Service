@@ -70,6 +70,10 @@ public class LibraryServiceTest {
         transactionRepository.deleteAll();
     }
 
+    /**
+     * Tests the initialization of the inventory when it is empty.
+     *
+     */
     @Test
     public void testInitInventoryWhenEmpty() throws JsonProcessingException {
         List<LibraryDataItem> items = new ArrayList<>();
@@ -77,6 +81,10 @@ public class LibraryServiceTest {
         assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCode().value());
     }
 
+    /**
+     * Tests the initialization of the inventory with valid data.
+     *
+     */
     @Test
     public void testInitInventoryWhenValid() throws JsonProcessingException {
         ResponseEntity<String> responseEntity = libraryServiceRequests.init(baseUrl, items);
@@ -85,6 +93,9 @@ public class LibraryServiceTest {
         assert responseEntity.getBody().contains("Items added successfully: 2");
     }
 
+    /**
+     * Tests the retrieval of the inventory when it is empty.
+     */
     @Test
     public void getInventoryWhenEmpty() {
         ResponseEntity<Map<ItemType, List<LibraryItem>>> responseEntity = libraryServiceRequests.getInventory(baseUrl);
@@ -93,6 +104,10 @@ public class LibraryServiceTest {
         assertEquals(0, responseEntity.getBody().size());
     }
 
+    /**
+     * Tests the retrieval of the inventory with valid data.
+     *
+     */
     @Test
     public void getInventoryWhenValid() throws JsonProcessingException {
         //Populate Data
@@ -104,6 +119,9 @@ public class LibraryServiceTest {
         assertEquals(2, responseEntity.getBody().size());
     }
 
+    /**
+     * Tests the scenario when attempting to borrow an item with an invalid item name.
+     */
     @Test
     public void borrowWhenInvalidItemName() {
         BorrowItemRequest borrowItemRequest = new BorrowItemRequest();
@@ -111,6 +129,9 @@ public class LibraryServiceTest {
         assertEquals(HttpStatus.NOT_FOUND.value(), responseEntity.getStatusCode().value());
     }
 
+    /**
+     * Tests the scenario when attempting to borrow an item with an invalid user ID.
+     */
     @Test
     public void borrowWhenInvalidUserId() throws JsonProcessingException {
         //Populate Data
@@ -122,6 +143,9 @@ public class LibraryServiceTest {
         assertEquals(HttpStatus.NOT_FOUND.value(), responseEntity.getStatusCode().value());
     }
 
+    /**
+     * Tests the scenario of successfully borrowing an item with valid data.
+     */
     @Test
     public void borrowValid() throws JsonProcessingException {
         //Populate Data
@@ -144,7 +168,9 @@ public class LibraryServiceTest {
         assertEquals(ActionType.BORROW, transactions.get(0).getActionType());
     }
 
-
+    /**
+     * Tests the scenario of attempting to return an invalid item.
+     */
     @Test
     public void returnInvalidItem() {
         ResponseEntity<LibraryItem> responseEntity = libraryServiceRequests.returnItem(baseUrl, new ReturnItemRequest());
@@ -152,6 +178,9 @@ public class LibraryServiceTest {
 
     }
 
+    /**
+     * Tests the scenario of attempting to return an item with an invalid user ID.
+     */
     @Test
     public void testReturnItemWhenInvalidUserId() throws JsonProcessingException {
         // Borrow the item
@@ -165,6 +194,9 @@ public class LibraryServiceTest {
         assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCode().value());
     }
 
+    /**
+     * Tests the scenario of successfully returning an item.
+     */
     @Test
     public void testReturnItemValid() throws JsonProcessingException {
         // Borrow the item
@@ -185,6 +217,9 @@ public class LibraryServiceTest {
         assertEquals(ActionType.RETURN, transactions.get(1).getActionType());
     }
 
+    /**
+     * Tests the scenario when there are no overdue items in the inventory.
+     */
     @Test
     public void testOverdueItemsWhenNoneOverdue() throws JsonProcessingException {
         // Populate the data
@@ -195,6 +230,9 @@ public class LibraryServiceTest {
         assertEquals(0, responseEntity.getBody().size());
     }
 
+    /**
+     * Tests the functionality of the overdue item scheduler service.
+     */
     @Test
     public void testOverdueServiceFunctionality() {
         for (LibraryItem libraryItem: overdueList) {
@@ -208,12 +246,18 @@ public class LibraryServiceTest {
         assertEquals(2, responseEntity.getBody().size());
     }
 
+    /**
+     * Tests the scenario when attempting to check the availability of an item with invalid data.
+     */
     @Test
     public void testAvailabilityInvalid() {
         ResponseEntity<LibraryItem> responseEntity = libraryServiceRequests.getAvailable(baseUrl, new ItemAvailabilityRequest());
         assertEquals(HttpStatus.NOT_FOUND.value(), responseEntity.getStatusCode().value());
     }
 
+    /**
+     * Tests the scenario when checking the availability of a valid item.
+     */
     @Test
     public void testAvailabilityItemFound() throws JsonProcessingException {
         testInitInventoryWhenValid();
@@ -225,12 +269,18 @@ public class LibraryServiceTest {
         assertEquals(item1.getItemId(), responseEntity.getBody().getItemId());
     }
 
+    /**
+     * Tests the scenario when attempting to retrieve borrowed items for an invalid user.
+     */
     @Test
     public void testBorrowedItemsFromUserWhenUserInvalid() {
         ResponseEntity<String> responseEntity = libraryServiceRequests.getBorrowedForUserError(baseUrl, "123");
         assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCode().value());
     }
 
+    /**
+     * Tests the scenario when retrieving borrowed items for a valid user.
+     */
     @Test
     public void testBorrowedItemsFromUserWhenUserValid() throws JsonProcessingException {
         // Populate and Borrow

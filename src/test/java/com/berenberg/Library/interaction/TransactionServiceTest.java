@@ -8,6 +8,7 @@ import com.berenberg.Library.model.LibraryItem;
 import com.berenberg.Library.model.Transaction;
 import com.berenberg.Library.model.User;
 import com.berenberg.Library.model.requests.Library.BorrowItemRequest;
+import com.berenberg.Library.model.requests.Library.ReturnItemRequest;
 import com.berenberg.Library.servicerequests.LibraryServiceRequests;
 import com.berenberg.Library.servicerequests.TransactionServiceRequests;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -57,6 +58,9 @@ public class TransactionServiceTest {
         transactionRepository.deleteAll();
     }
 
+    /**
+     * Tests the scenario when attempting to find a transaction for an invalid user ID.
+     */
     @Test
     public void findTransactionForInvalidUserId() throws JsonProcessingException {
         borrowValid();
@@ -64,6 +68,9 @@ public class TransactionServiceTest {
         assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCode().value());
     }
 
+    /**
+     * Tests the scenario when finding a transaction for a valid user ID.
+     */
     @Test
     public void findTransactionForUserId() throws JsonProcessingException {
         borrowValid();
@@ -72,6 +79,9 @@ public class TransactionServiceTest {
         assertEquals(1, responseEntity.getBody().size());
     }
 
+    /**
+     * Tests the scenario when attempting to find a transaction for an invalid item.
+     */
     @Test
     public void findTransactionForItemInvalid() throws JsonProcessingException {
         borrowValid();
@@ -79,6 +89,9 @@ public class TransactionServiceTest {
         assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCode().value());
     }
 
+    /**
+     * Tests the scenario when finding a transaction for a valid item.
+     */
     @Test
     public void findTransactionForItem() throws JsonProcessingException {
         borrowValid();
@@ -117,6 +130,29 @@ public class TransactionServiceTest {
 
         List<Transaction> transactions = transactionRepository.findAll();
         assertEquals(ActionType.BORROW, transactions.get(0).getActionType());
+    }
+
+    /**
+     * Tests the scenario of successfully returning an item.
+     */
+    @Test
+    public void testReturnItemValid() throws JsonProcessingException {
+        // Borrow the item
+        borrowValid();
+
+        ReturnItemRequest returnItemRequest = new ReturnItemRequest();
+        List<Transaction> transactions = transactionRepository.findAll();
+        returnItemRequest.setUniqueItemId(transactions.get(0).getUniqueItemId());
+        returnItemRequest.setUserId(transactions.get(0).getUserId());
+
+        ResponseEntity<LibraryItem> responseEntity = libraryServiceRequests.returnItem(baseUrl, returnItemRequest);
+        assertEquals(HttpStatus.OK.value(), responseEntity.getStatusCode().value());
+        assertEquals(false, responseEntity.getBody().getIsBorrowed());
+        assertEquals("", responseEntity.getBody().getBorrowedBy());
+        assertEquals(false, responseEntity.getBody().getIsOverdue());
+
+        transactions = transactionRepository.findAll();
+        assertEquals(ActionType.RETURN, transactions.get(1).getActionType());
     }
 
 }

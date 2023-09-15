@@ -37,19 +37,28 @@ public class UserServiceTest {
         userRepository.deleteAll();
     }
 
-
+    /**
+     * Tests the creation of a user with an invalid name.
+     * This test attempts to create a user with an invalid name and expects a BAD_REQUEST status code in the response.
+     */
     @Test
     public void testCreateInvalidName() {
         ResponseEntity<User> userResponseEntity = userServiceRequests.create(baseUrl, invalidName);
         assertEquals(HttpStatus.BAD_REQUEST.value(), userResponseEntity.getStatusCode().value());
     }
 
+    /**
+     * Tests the creation of a user with an invalid email.
+     */
     @Test
     public void testCreateInvalidEmail() {
         ResponseEntity<User> userResponseEntity = userServiceRequests.create(baseUrl, invalidEmail);
         assertEquals(HttpStatus.BAD_REQUEST.value(), userResponseEntity.getStatusCode().value());
     }
 
+    /**
+     * Tests the creation of a valid user.
+     */
     @Test
     public void testCreateUserValid() {
         ResponseEntity<User> userResponseEntity = userServiceRequests.create(baseUrl, validUser);
@@ -58,6 +67,9 @@ public class UserServiceTest {
         assertEquals(validUser.getEmail(), userResponseEntity.getBody().getEmail());
     }
 
+    /**
+     * Tests the scenario when attempting to create a user that already exists.
+     */
     @Test
     public void testCreateUserExists() {
         testCreateUserValid();
@@ -65,12 +77,18 @@ public class UserServiceTest {
         assertEquals(HttpStatus.BAD_REQUEST.value(), userResponseEntity.getStatusCode().value());
     }
 
+    /**
+     * Tests the scenario when attempting to remove an invalid user.
+     */
     @Test
     public void testRemoveUserInvalid() {
         ResponseEntity<String> userResponseEntity = userServiceRequests.remove(baseUrl, removeInvalidUser);
         assertEquals(HttpStatus.BAD_REQUEST.value(), userResponseEntity.getStatusCode().value());
     }
 
+    /**
+     * Tests the removal of a valid user.
+     */
     @Test
     public void testRemoveUserValid() {
         testCreateUserValid();
